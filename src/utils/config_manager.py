@@ -61,17 +61,18 @@ def get_product_details(product_id):
     conn.close()
     return product
 
-def search_products(search_term):
+def search_products(search_term, criteria):
     conn = create_connection()
     cursor = conn.cursor()
-    query = '''
-        SELECT * FROM products 
-        WHERE name LIKE ? OR 
-              CAST(price AS TEXT) LIKE ? OR 
-              CAST(quantity AS TEXT) LIKE ?
-    '''
-    search_term = f"%{search_term}%"  # Formato para búsqueda parcial
-    cursor.execute(query, (search_term, search_term, search_term))
+    if criteria == 'name':
+        # Búsqueda por nombre con coincidencia parcial
+        query = "SELECT * FROM products WHERE name LIKE ?"
+        search_term = f"%{search_term}%"
+        cursor.execute(query, (search_term,))
+    elif criteria == 'price':
+        # Búsqueda por precio, filtrando los productos con precios menores al valor ingresado
+        query = "SELECT * FROM products WHERE price < ?"
+        cursor.execute(query, (search_term,))
     products = cursor.fetchall()
     conn.close()
     return products

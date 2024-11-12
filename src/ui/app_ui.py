@@ -30,7 +30,7 @@ def go_back(root):
 
 # Función para mostrar la interfaz principal según el rol seleccionado
 def main_window(role):
-    global input_id, input_name, input_description, input_quantity, input_price, product_list, search_input
+    global input_id, input_name, input_description, input_quantity, input_price, product_list, search_input, search_criteria
     root = tk.Tk()
     root.title("Gestión de Inventario")
     root.geometry("500x600")
@@ -82,9 +82,14 @@ def main_window(role):
 
     if role == "client":
         # Campo de búsqueda y botón de búsqueda (solo para cliente)
-        tk.Label(root, text="Buscar Producto por Nombre, Precio o Cantidad").pack(pady=5)
+        tk.Label(root, text="Buscar Producto").pack(pady=5)
         search_input = tk.Entry(root)
         search_input.pack(pady=5)
+
+        # Selección de criterio de búsqueda (nombre o precio)
+        search_criteria = tk.StringVar(value="name")
+        tk.Radiobutton(root, text="Nombre", variable=search_criteria, value="name").pack()
+        tk.Radiobutton(root, text="Precio menor a", variable=search_criteria, value="price").pack()
 
         search_button = tk.Button(root, text="Buscar", command=handle_search_product)
         search_button.pack(pady=5)
@@ -101,12 +106,22 @@ def main_window(role):
 # Función para manejar la búsqueda de productos
 def handle_search_product():
     search_term = search_input.get()
+    criteria = search_criteria.get()
+
     if not search_term:
         messagebox.showerror("Error", "Ingrese un término de búsqueda.")
         return
 
-    # Filtrar productos en la base de datos
-    filtered_products = search_products(search_term)
+    # Convertir a número si el criterio es precio
+    if criteria == 'price':
+        try:
+            search_term = float(search_term)
+        except ValueError:
+            messagebox.showerror("Error", "Ingrese un valor numérico para la búsqueda por precio.")
+            return
+
+    # Realizar la búsqueda según el criterio
+    filtered_products = search_products(search_term, criteria)
     product_list.delete(0, tk.END)  # Borra la lista actual
     for product in filtered_products:
         product_list.insert(tk.END, f"ID: {product[0]}, Nombre: {product[1]}, Cantidad: {product[3]}, Precio: ${product[4]}")
