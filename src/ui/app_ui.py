@@ -1,6 +1,6 @@
 import tkinter as tk
 from tkinter import messagebox
-from utils.config_manager import add_product, update_product, delete_product, get_all_products, get_product_details, product_exists
+from utils.config_manager import add_product, update_product, delete_product, get_all_products, get_product_details, product_exists, search_products
 
 # Función para seleccionar el rol inicial
 def role_selection_window():
@@ -23,12 +23,21 @@ def open_main_window(role, root):
     root.destroy()  # Cierra la ventana de selección de rol
     main_window(role)
 
+# Función para regresar a la pantalla de selección de rol
+def go_back(root):
+    root.destroy()
+    role_selection_window()
+
 # Función para mostrar la interfaz principal según el rol seleccionado
 def main_window(role):
-    global input_id, input_name, input_description, input_quantity, input_price, product_list
+    global input_id, input_name, input_description, input_quantity, input_price, product_list, search_input
     root = tk.Tk()
     root.title("Gestión de Inventario")
-    root.geometry("500x500")
+    root.geometry("500x600")
+
+    # Botón para regresar a la pantalla de selección de rol
+    back_button = tk.Button(root, text="Regresar", command=lambda: go_back(root))
+    back_button.pack(pady=5)
 
     if role == "admin":
         # Sección de entrada de datos (solo para administrador)
@@ -72,8 +81,12 @@ def main_window(role):
     detail_button.pack(pady=5)
 
     if role == "client":
-        # Botón de búsqueda de productos (solo para cliente)
-        search_button = tk.Button(root, text="Buscar Productos", command=search_product_window)
+        # Campo de búsqueda y botón de búsqueda (solo para cliente)
+        tk.Label(root, text="Buscar Producto por Nombre, Precio o Cantidad").pack(pady=5)
+        search_input = tk.Entry(root)
+        search_input.pack(pady=5)
+
+        search_button = tk.Button(root, text="Buscar", command=handle_search_product)
         search_button.pack(pady=5)
 
     # Botón para recargar la lista de productos (para ambos roles)
@@ -84,6 +97,19 @@ def main_window(role):
     load_products()
 
     root.mainloop()
+
+# Función para manejar la búsqueda de productos
+def handle_search_product():
+    search_term = search_input.get()
+    if not search_term:
+        messagebox.showerror("Error", "Ingrese un término de búsqueda.")
+        return
+
+    # Filtrar productos en la base de datos
+    filtered_products = search_products(search_term)
+    product_list.delete(0, tk.END)  # Borra la lista actual
+    for product in filtered_products:
+        product_list.insert(tk.END, f"ID: {product[0]}, Nombre: {product[1]}, Cantidad: {product[3]}, Precio: ${product[4]}")
 
 # Manejar la adición de un producto con validación
 def handle_add_product():
@@ -158,10 +184,6 @@ def show_product_details():
     tk.Label(detail_window, text=f"Descripción: {product_details[2]}").pack(pady=5)
     tk.Label(detail_window, text=f"Cantidad: {product_details[3]}").pack(pady=5)
     tk.Label(detail_window, text=f"Precio: ${product_details[4]}").pack(pady=5)
-
-# Función de búsqueda de productos (pendiente de implementar)
-def search_product_window():
-    pass  # Aquí puedes implementar la ventana de búsqueda
 
 # Iniciar la aplicación con la selección de rol
 role_selection_window()

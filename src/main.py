@@ -7,3 +7,4 @@ create_table()
 # Ejecutar la interfaz principal
 if __name__ == "__main__":
     main_window()
+
