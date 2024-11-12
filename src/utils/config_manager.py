@@ -30,3 +30,12 @@ def delete_product(product_id):
     cursor.execute('DELETE FROM products WHERE id = ?', (product_id,))
     conn.commit()
     conn.close()
+
+# Función para obtener todos los productos
+def get_all_products():
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT id, name, description, quantity, price FROM products')
+    products = cursor.fetchall()
+    conn.close()
+    return products
