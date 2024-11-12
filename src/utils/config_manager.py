@@ -52,3 +52,11 @@ def get_all_products():
     products = cursor.fetchall()
     conn.close()
     return products
+
+def get_product_details(product_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT * FROM products WHERE id = ?', (product_id,))
+    product = cursor.fetchone()
+    conn.close()
+    return product
