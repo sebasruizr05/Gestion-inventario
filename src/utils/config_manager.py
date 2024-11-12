@@ -1,13 +1,24 @@
 from utils.db_utils import create_connection
 
+# Verificar si un producto existe por ID
+def product_exists(product_id):
+    conn = create_connection()
+    cursor = conn.cursor()
+    cursor.execute('SELECT COUNT(1) FROM products WHERE id = ?', (product_id,))
+    exists = cursor.fetchone()[0] > 0
+    conn.close()
+    return exists
+
 # Función para agregar un producto
-def add_product(name, description, quantity, price):
+def add_product(name, description, quantity, price, product_id):
+    if product_exists(product_id):
+        raise ValueError(f"El producto con el código {product_id} ya existe.")
     conn = create_connection()
     cursor = conn.cursor()
     cursor.execute('''
-        INSERT INTO products (name, description, quantity, price)
-        VALUES (?, ?, ?, ?)
-    ''', (name, description, quantity, price))
+        INSERT INTO products (id, name, description, quantity, price)
+        VALUES (?, ?, ?, ?, ?)
+    ''', (product_id, name, description, quantity, price))
     conn.commit()
     conn.close()
 
@@ -25,6 +36,8 @@ def update_product(product_id, name, description, quantity, price):
 
 # Función para eliminar un producto
 def delete_product(product_id):
+    if not product_exists(product_id):
+        raise ValueError(f"El producto con el código {product_id} no existe.")
     conn = create_connection()
     cursor = conn.cursor()
     cursor.execute('DELETE FROM products WHERE id = ?', (product_id,))

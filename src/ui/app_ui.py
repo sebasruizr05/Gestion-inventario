@@ -1,31 +1,54 @@
 import tkinter as tk
 from tkinter import messagebox
-from utils.config_manager import add_product, update_product, delete_product, get_all_products
+from utils.config_manager import add_product, update_product, delete_product, get_all_products, product_exists
 
+# Manejar la adición de un producto con validación
 def handle_add_product():
-    name = input_name.get()
-    description = input_description.get()
-    quantity = int(input_quantity.get())
-    price = float(input_price.get())
-    add_product(name, description, quantity, price)
-    messagebox.showinfo("Info", "Producto agregado correctamente")
-    load_products()
+    try:
+        product_id = int(input_id.get())
+        name = input_name.get()
+        description = input_description.get()
+        quantity = int(input_quantity.get())
+        price = float(input_price.get())
 
+        # Validación para verificar si el producto ya existe
+        if product_exists(product_id):
+            messagebox.showerror("Error", f"El producto con ID {product_id} ya existe.")
+        else:
+            add_product(name, description, quantity, price, product_id)
+            messagebox.showinfo("Info", "Producto agregado correctamente")
+            load_products()
+    except ValueError as e:
+        messagebox.showerror("Error", f"Error en la entrada de datos: {str(e)}")
+
+# Manejar la edición de un producto existente
 def handle_edit_product():
-    product_id = int(input_id.get())
-    name = input_name.get()
-    description = input_description.get()
-    quantity = int(input_quantity.get())
-    price = float(input_price.get())
-    update_product(product_id, name, description, quantity, price)
-    messagebox.showinfo("Info", "Producto editado correctamente")
-    load_products()
+    try:
+        product_id = int(input_id.get())
+        name = input_name.get()
+        description = input_description.get()
+        quantity = int(input_quantity.get())
+        price = float(input_price.get())
+        update_product(product_id, name, description, quantity, price)
+        messagebox.showinfo("Info", "Producto editado correctamente")
+        load_products()
+    except ValueError as e:
+        messagebox.showerror("Error", f"Error en la entrada de datos: {str(e)}")
 
+# Manejar la eliminación de un producto con validación
 def handle_delete_product():
-    product_id = int(input_id.get())
-    delete_product(product_id)
-    messagebox.showinfo("Info", "Producto eliminado correctamente")
-    load_products()
+    try:
+        product_id = int(input_id.get())
+
+        # Validación para verificar si el producto existe antes de eliminarlo
+        if not product_exists(product_id):
+            messagebox.showerror("Error", f"El producto con ID {product_id} no existe.")
+        else:
+            delete_product(product_id)
+            messagebox.showinfo("Info", "Producto eliminado correctamente")
+            load_products()
+    except ValueError as e:
+        messagebox.showerror("Error", f"Error en la entrada de datos: {str(e)}")
 
 # Función para cargar todos los productos en el Listbox
 def load_products():
@@ -34,6 +57,7 @@ def load_products():
     for product in products:
         product_list.insert(tk.END, f"ID: {product[0]}, Nombre: {product[1]}, Cantidad: {product[3]}, Precio: ${product[4]}")
 
+# Configuración de la ventana principal
 def main_window():
     global input_id, input_name, input_description, input_quantity, input_price, product_list
     root = tk.Tk()
@@ -41,7 +65,7 @@ def main_window():
     root.geometry("500x500")
 
     # Sección de entrada de datos
-    tk.Label(root, text="ID de Producto (para editar/eliminar)").pack(pady=5)
+    tk.Label(root, text="ID de Producto (para agregar/editar/eliminar)").pack(pady=5)
     input_id = tk.Entry(root)
     input_id.pack(pady=5)
 
